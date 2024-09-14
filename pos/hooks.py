@@ -25,8 +25,12 @@ app_license = "mit"
 # ------------------
 
 # include js, css files in header of desk.html
-# app_include_css = "/assets/pos/css/pos.css"
-# app_include_js = "/assets/pos/js/pos.js"
+# app_include_css = "/assets/pos/css/custom_pos_item_cart.css"
+app_include_js = [
+  
+"/assets/pos/js/custom_pos_item_cart.js"
+
+]
 
 # include js, css files in header of web template
 # web_include_css = "/assets/pos/css/pos.css"
@@ -41,6 +45,8 @@ app_license = "mit"
 
 # include js in page
 # page_js = {"page" : "public/js/file.js"}
+# page_js = {"point_of_sale" : "public/js/custom_pos_item_cart.js"}
+
 
 # include js in doctype views
 # doctype_js = {"doctype" : "public/js/doctype.js"}
