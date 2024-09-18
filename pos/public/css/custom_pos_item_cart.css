@@ -1,7 +1,7 @@
    .customer-group-field {
-       background-color: #f8f9fa;
+       background-color: var(--fg-color);
        border: 1px solid #ced4da;
-       border-radius: 4px;
+       border-radius: var(--border-radius-md);
        padding: 10px;
        margin-bottom: 10px;
    }

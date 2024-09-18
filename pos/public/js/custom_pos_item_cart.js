@@ -16,8 +16,6 @@ function overridePOSItemSelector() {
         this.$customer_section = this.$component.find(".customer-section");
         this.make_customer_group_selector();
         this.make_customer_selector();
-       
-       
       };
 
     erpnext.PointOfSale.ItemCart.prototype.make_customer_group_selector =
@@ -26,12 +24,23 @@ function overridePOSItemSelector() {
                     <div class="customer-group-field"></div>
                 `);
         const me = this;
+
+        let filters = {};
+        const allowed_customer_group = this.allowed_customer_groups || [];
+        filters = {
+          name: ["in", allowed_customer_group],
+        };
         this.customer_group_field = frappe.ui.form.make_control({
           df: {
             label: __("Customer Group"),
             fieldtype: "Link",
             options: "Customer Group",
             placeholder: __("Select Customer Group"),
+            get_query: function () {
+              return {
+                filters: filters,
+              };
+            },
             onchange: function () {
               me.make_customer_selector(this.value);
             },
@@ -48,13 +57,25 @@ function overridePOSItemSelector() {
       this.$customer_section.html(`
       	<div class="customer-field"></div>
       `);
+
       const me = this;
       let filters = {};
-      if (customer_group) {
+      const allowed_customer_group = this.allowed_customer_groups || [];
+
+      console.log("allowed_customer_group", allowed_customer_group);
+      console.log("customer_group length", allowed_customer_group.length);
+      if (customer_group && (allowed_customer_group.length > 1)) {
         filters = {
           customer_group: customer_group,
         };
+      } else if (customer_group && (allowed_customer_group.length == 1)) {
+        filters = {
+          customer_group: allowed_customer_group[0],
+        };
+      } else {
+        filters = { customer_group: ["in", allowed_customer_group] };
       }
+
       this.customer_field = frappe.ui.form.make_control({
         df: {
           label: __("Customer"),
