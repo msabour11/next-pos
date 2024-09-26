@@ -29,7 +29,14 @@ app_include_css = "/assets/pos/css/custom_pos_item_cart.css"
 app_include_js = [
   
 "/assets/pos/js/custom_pos_item_cart.js",
-"/assets/pos/js/validate_customer.js"
+"/assets/pos/js/override_pos_customer_selector.js",
+"/assets/pos/js/override_past_order_list.js",
+"/assets/pos/js/override_pos_order_summary.js",
+# "/assets/pos/js/test.js"
+
+
+
+
 ]
 
 # include js, css files in header of web template
@@ -143,7 +150,7 @@ app_include_js = [
 # ---------------
 # Hook on document methods and events
 
-# doc_events = {
+#   = {
 # 	"*": {
 # 		"on_update": "method",
 # 		"on_cancel": "method",
@@ -180,9 +187,9 @@ app_include_js = [
 # Overriding Methods
 # ------------------------------
 #
-# override_whitelisted_methods = {
-# 	"frappe.desk.doctype.event.event.get_events": "pos.event.get_events"
-# }
+override_whitelisted_methods = {
+	"erpnext.accounts.doctype.pos_invoice.pos_invoice.get_stock_availability": "pos.pos_api.get_stock_availability"
+}
 #
 # each overriding function accepts a `data` argument;
 # generated from the base implementation of the doctype dashboard,
