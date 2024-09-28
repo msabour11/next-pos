@@ -27,12 +27,11 @@ app_license = "mit"
 # include js, css files in header of desk.html
 app_include_css = "/assets/pos/css/custom_pos_item_cart.css"
 app_include_js = [
-  
+# "/assets/pos/js/override_pos_controller.js",
 "/assets/pos/js/custom_pos_item_cart.js",
 "/assets/pos/js/override_pos_customer_selector.js",
 "/assets/pos/js/override_past_order_list.js",
 "/assets/pos/js/override_pos_order_summary.js",
-# "/assets/pos/js/test.js"
 
 
 

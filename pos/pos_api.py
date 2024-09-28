@@ -98,6 +98,7 @@ def get_total_unpaid_amount(customer):
 
 
 # override get_stock_availability bundle
+@frappe.whitelist()
 
 def get_pos_reserved_qty_of_bundles(item_code):
     """
