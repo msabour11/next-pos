@@ -144,11 +144,9 @@ def get_pos_reserved_qty_of_bundles(item_code):
 
 @frappe.whitelist()
 def get_stock_availability(item_code, warehouse):
-    frappe.msgprint("from outside class")
    
     
     if frappe.db.get_value("Item", item_code, "is_stock_item"):
-        frappe.msgprint("from if condition")
         is_stock_item = True
         bin_qty = get_bin_qty(item_code, warehouse)
         pos_sales_qty = get_pos_reserved_qty(item_code, warehouse)
