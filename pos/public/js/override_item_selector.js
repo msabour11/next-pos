@@ -1,4 +1,4 @@
-function overridePOSCustomerSelector() {
+function overrideItemSelector() {
   if (
     typeof erpnext !== "undefined" &&
     typeof erpnext.PointOfSale !== "undefined" &&
@@ -96,7 +96,7 @@ function overridePOSCustomerSelector() {
 		</div>`;
     };
   } else {
-    setTimeout(overridePOSCustomerSelector, 100);
+    setTimeout(overrideItemSelector, 100);
   }
 }
-overridePOSCustomerSelector();
+overrideItemSelector();

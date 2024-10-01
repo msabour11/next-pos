@@ -51,7 +51,6 @@ function overridePOSItemCart() {
               };
             },
             onchange: function () {
-              me.test();
               me.make_customer_selector(this.value);
             },
           },
@@ -116,7 +115,6 @@ function overridePOSItemCart() {
                     () => me.update_customer_section(),
                     () => me.update_totals_section(),
                     // ()=>me.update_total_unpaid(this.value),
-                    // () => me.test(),
 
                     () => frappe.dom.unfreeze(),
                   ]);

@@ -32,6 +32,8 @@ app_include_js = [
 "/assets/pos/js/override_past_order_list.js",
 "/assets/pos/js/override_pos_order_summary.js",
 "/assets/pos/js/override_item_selector.js",
+"/assets/pos/js/override_pos_controller.js",
+
 
 
 
