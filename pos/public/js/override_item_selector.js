@@ -41,7 +41,11 @@ function overrideItemSelector() {
       if (item.is_stock_item) {
         // Replace quantity with "Out of Stock" if actual_qty <= 0
         if (actual_qty <= 0) {
-          qty_to_display = "Out of Stock";
+          // qty_to_display = "Out of Stock";
+          // qty_to_display = "<b>Out of Stock</b>";
+          qty_to_display =
+            '<b style="background-color: red; color: white; padding: 2px 4px;">Out of Stock</b>';
+
           indicator_color = "red";
         } else {
           indicator_color = actual_qty > 10 ? "green" : "orange";

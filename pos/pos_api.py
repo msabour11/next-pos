@@ -1,11 +1,124 @@
+# import frappe
+# from erpnext.accounts.utils import get_balance_on
+# from frappe.query_builder.functions import IfNull, Sum
+# from frappe.utils import cint, flt, get_link_to_form, getdate, nowdate
+# from erpnext.accounts.doctype.payment_entry.payment_entry import get_party_details
+
+
+
+# @frappe.whitelist()
+# def pos_postpaid(customer=None,name=None,paid_amount=None,reference_name=None):
+#     # Retrieve the POS Invoice document
+#     doc = frappe.get_doc("POS Invoice", name)
+#     paid_amount = float(paid_amount)
+
+#     if doc.outstanding_amount == 0:
+#         return 0
+#     if doc.status == "Consolidated":
+#         add_payment_entry(customer,paid_amount,reference_name)
+
+    
+#     # Update the total_net_weight field
+#     old_paid = doc.paid_amount
+#     doc.paid_amount = paid_amount+old_paid
+#     doc.outstanding_amount = doc.grand_total - doc.paid_amount
+#     if doc.outstanding_amount == 0:
+#         doc.status = "Paid"
+    
+#     # Update the base_amount field in the payments child table
+#     for payment in doc.payments:
+#         payment.amount = payment.amount+paid_amount
+#         payment.base_amount = payment.amount 
+    
+#     # Allow changes to the document even if it is submitted
+#     doc.flags.ignore_permissions = True
+#     doc.flags.ignore_validate_update_after_submit = True
+    
+#     # Save the document
+#     doc.save(ignore_permissions=True)
+    
+#     # Commit the changes to the database
+#     frappe.db.commit()
+
+
+
+#     return "hi how are you"
+
+
+
+# @frappe.whitelist(allow_guest=True)
+# def add_payment_entry(customer,paid_amount,reference_name):
+#     # customer_account = get_accounts_details(customer)
+   
+
+#     pe=frappe.new_doc("Payment Entry")
+#     payment_entry={
+#         "party_type":"Customer",
+#         "party":customer,
+#         "payment_type":"Receive",
+#         "mode_of_payment":"Cash",
+#         "paid_amount":paid_amount,
+#         "received_amount":paid_amount,
+#         "paid_from":"Debtors - CD",
+#         "paid_to":"Cash - CD",
+#         "target_exchange_rate":1,
+#         "source_exchange_rate":1,
+#         "paid_to_account_currency":"EGP",
+#     }
+#     #add payments details in payment reference child table
+#     pe.update(payment_entry)
+ 	
+#     references = [
+#         {
+#             "reference_doctype": "Sales Invoice",
+#             "reference_name": reference_name,
+#             "allocated_amount":paid_amount
+#         }
+#     ]
+#     for reference in references:
+#         pe.append("references", {
+#             "reference_doctype": reference["reference_doctype"],
+#             "reference_name": reference["reference_name"],
+#             "allocated_amount": reference["allocated_amount"],
+
+#         })
+
+
+#     pe.flags.ignore_permissions = True
+#     pe.flags.ignore_validate_update_after_submit = True
+
+    
+
+#     pe.save(ignore_permissions=True)
+
+
+#     pe.submit()
+#     frappe.db.commit()
+    
+# @frappe.whitelist(allow_guest=True)
+# def get_total_unpaid_amount(customer):
+#     amount= frappe.db.sql(""" select sum(outstanding_amount) from `tabSales Invoice` where customer=%s and docstatus=1 """,(customer,))
+#     return amount
+
+# @frappe.whitelist(allow_guest=True)
+# def get_accounts_details(customer):
+#     res = get_party_details("Page (Demo)","Customer",customer)
+#     customer_account = res["party_account"]
+#     print("the customer is",customer)
+
+#     # return customer_account
+#     return customer_account
+
 import frappe
 from erpnext.accounts.utils import get_balance_on
 from frappe.query_builder.functions import IfNull, Sum
 from frappe.utils import cint, flt, get_link_to_form, getdate, nowdate
-
+from erpnext.accounts.doctype.payment_entry.payment_entry import get_party_details
 
 @frappe.whitelist()
-def pos_postpaid(customer=None,name=None,paid_amount=None,reference_name=None):
+def pos_postpaid(customer=None, name=None, paid_amount=None, reference_name=None,customer_account=None):
+    # customer_account = get_accounts_details(customer)
+    print(customer_account,"\n\n\n\n/n/n/n/n")
     # Retrieve the POS Invoice document
     doc = frappe.get_doc("POS Invoice", name)
     paid_amount = float(paid_amount)
@@ -13,61 +126,60 @@ def pos_postpaid(customer=None,name=None,paid_amount=None,reference_name=None):
     if doc.outstanding_amount == 0:
         return 0
     if doc.status == "Consolidated":
-        add_payment_entry(customer,paid_amount,reference_name)
+        add_payment_entry(customer, paid_amount, reference_name,customer_account)
 
-    
     # Update the total_net_weight field
     old_paid = doc.paid_amount
-    doc.paid_amount = paid_amount+old_paid
+    doc.paid_amount = paid_amount + old_paid
     doc.outstanding_amount = doc.grand_total - doc.paid_amount
     if doc.outstanding_amount == 0:
         doc.status = "Paid"
-    
+
     # Update the base_amount field in the payments child table
     for payment in doc.payments:
-        payment.amount = payment.amount+paid_amount
-        payment.base_amount = payment.amount 
-    
+        payment.amount += paid_amount
+        payment.base_amount = payment.amount
+
     # Allow changes to the document even if it is submitted
     doc.flags.ignore_permissions = True
     doc.flags.ignore_validate_update_after_submit = True
-    
+
     # Save the document
     doc.save(ignore_permissions=True)
-    
+
     # Commit the changes to the database
     frappe.db.commit()
-    
+
     return "hi how are you"
 
-
-
 @frappe.whitelist(allow_guest=True)
-def add_payment_entry(customer,paid_amount,reference_name):
-   
+def add_payment_entry(customer, paid_amount, reference_name,customer_account):
+    # customer_account = get_accounts_details(customer)
+    if not customer_account:
+        frappe.throw(f"Customer account for {customer} not found")
 
-    pe=frappe.new_doc("Payment Entry")
-    Payment_entry={
-        "party_type":"Customer",
-        "party":customer,
-        "payment_type":"Receive",
-        "mode_of_payment":"Cash",
-        "paid_amount":paid_amount,
-        "received_amount":paid_amount,
-        "paid_from":"1310 - Debtors - LED",
-        "paid_to":"1110 - Cash - LED",
-        "target_exchange_rate":1,
-        "source_exchange_rate":1,
-        "paid_to_account_currency":"EGP",
+    pe = frappe.new_doc("Payment Entry")
+    payment_entry = {
+        "party_type": "Customer",
+        "party": customer,
+        "payment_type": "Receive",
+        "mode_of_payment": "Cash",
+        "paid_amount": paid_amount,
+        "received_amount": paid_amount,
+        "paid_from": customer_account,
+        "paid_to": "Cash - CD",
+        "target_exchange_rate": 1,
+        "source_exchange_rate": 1,
+        "paid_to_account_currency": "EGP",
     }
-    #add payments detailes in payment refrerence child table
-    pe.update(Payment_entry)
- 	
+    # Add payments details in payment reference child table
+    pe.update(payment_entry)
+
     references = [
         {
             "reference_doctype": "Sales Invoice",
             "reference_name": reference_name,
-            "allocated_amount":paid_amount
+            "allocated_amount": paid_amount
         }
     ]
     for reference in references:
@@ -75,25 +187,31 @@ def add_payment_entry(customer,paid_amount,reference_name):
             "reference_doctype": reference["reference_doctype"],
             "reference_name": reference["reference_name"],
             "allocated_amount": reference["allocated_amount"],
-
         })
-
 
     pe.flags.ignore_permissions = True
     pe.flags.ignore_validate_update_after_submit = True
 
-    
-
     pe.save(ignore_permissions=True)
-
-
     pe.submit()
     frappe.db.commit()
-    
+
 @frappe.whitelist(allow_guest=True)
 def get_total_unpaid_amount(customer):
-    amount= frappe.db.sql(""" select sum(outstanding_amount) from `tabSales Invoice` where customer=%s and docstatus=1 """,(customer,))
-    return amount
+    amount = frappe.db.sql("""SELECT SUM(outstanding_amount) FROM `tabSales Invoice` WHERE customer=%s AND docstatus=1""", (customer,))
+    return amount[0][0] if amount else 0
+
+@frappe.whitelist(allow_guest=True)
+def get_accounts_details(customer):
+    res = get_party_details("Com (Demo)", "Customer", customer)
+    # customer="Mohmed"
+    if not res:
+        frappe.throw(f"Customer {customer} details not found")
+    customer_account = res.get("party_account")
+    if not customer_account:
+        frappe.throw(f"Customer account for {customer} not found")
+    return customer_account
+
 
 
 

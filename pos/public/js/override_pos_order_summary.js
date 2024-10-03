@@ -33,7 +33,14 @@ function overridePastOrderSummary() {
       });
       /////////////
 
-      this.$summary_container.on("click", ".pay-btn", () => {
+      this.$summary_container.on("click", ".pay-btn", async () => {
+        const doc = this.events.get_frm().doc;
+        const pos_profile = doc.pos_profile;
+        // const cus_account = await this.get_customer_account(pos_profile);
+        const cus_account = await this.get_customer_account_from_api(
+          this.doc.customer
+        );
+
         let newFieldValue = this.$summary_container.find("#new-field").val();
 
         const parsedValue = parseFloat(newFieldValue);
@@ -62,15 +69,19 @@ function overridePastOrderSummary() {
             paid_amount: newFieldValue,
             customer: this.doc.customer,
             reference_name: this.doc.consolidated_invoice,
+            customer_account: cus_account,
           },
           callback: function (r) {
             if (!r.exc) {
+              // console.log("the customer account is$", r.message);
+              console.log(`the customer account is${typeof r.message}`);
               frappe.show_alert({
                 message: "Amount is Successfully Paid",
                 indicator: "green",
               });
+            } else {
+              frappe, msgprint("cannot handle the customer", this.doc.customer);
             }
-            console.log(r.message);
           },
         });
 
@@ -118,6 +129,54 @@ function overridePastOrderSummary() {
         this.print_receipt();
       });
     };
+
+    erpnext.PointOfSale.PastOrderSummary.prototype.get_customer_account =
+      function (pos_profile) {
+        return new Promise((resolve, reject) => {
+          frappe.call({
+            method:
+              "erpnext.selling.page.point_of_sale.point_of_sale.get_pos_profile_data",
+            args: { pos_profile: pos_profile },
+            callback: (res) => {
+              if (res.message) {
+                const customer_account = res.message.custom_customer_account;
+                console.log("customer account", customer_account);
+                resolve(customer_account); // Resolve the promise with the profile data
+              } else {
+                reject("No profile data returned");
+              }
+            },
+            error: (err) => {
+              console.error("Error fetching profile data:", err);
+              reject(err); // Reject the promise on error
+            },
+          });
+        });
+      };
+
+    ////////////////////////////
+    erpnext.PointOfSale.PastOrderSummary.prototype.get_customer_account_from_api =
+      function (customer) {
+        return new Promise((resolve, reject) => {
+          frappe.call({
+            method: "pos.pos_api.get_accounts_details",
+            args: { customer: customer },
+            callback: (res) => {
+              if (res.message) {
+                const customer_account = res.message;
+                console.log("customer account", customer_account);
+                resolve(customer_account); // Resolve the promise with the profile data
+              } else {
+                reject("No profile data returned");
+              }
+            },
+            error: (err) => {
+              console.error("Error fetching profile data:", err);
+              reject(err); // Reject the promise on error
+            },
+          });
+        });
+      };
   } else {
     setTimeout(overridePastOrderSummary, 100);
   }

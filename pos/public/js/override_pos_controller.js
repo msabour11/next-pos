@@ -24,8 +24,9 @@ function overridePastController() {
           __("Open Form View"),
           this.open_form_view.bind(this),
           {
-            icon: "list",
+            // icon: "list",
             label: __("Open Form View"),
+            btn_class: "btn btn-custom-green", // Green button
           }
         )
       );
@@ -35,8 +36,12 @@ function overridePastController() {
           __("Toggle Recent Orders"),
           this.toggle_recent_order.bind(this),
           {
-            icon: "list",
+            // icon: "list",
             label: __("Toggle Recent Orders"),
+            btn_class: "btn-custom-yellow"
+
+          
+          
           }
         )
       );
@@ -46,7 +51,7 @@ function overridePastController() {
           __("Save as Draft"),
           this.save_draft_invoice.bind(this),
           {
-            icon: "list",
+            // icon: "list",
             label: __("Save as Draft"),
           }
         )
@@ -56,6 +61,7 @@ function overridePastController() {
         this.page.add_button(__("Close the POS"), this.close_pos.bind(this), {
           icon: "close",
           label: __("Close the POS"),
+          btn_class: "btn-custom-red",
         })
       );
 

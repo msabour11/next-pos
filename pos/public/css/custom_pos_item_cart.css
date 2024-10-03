@@ -1,23 +1,18 @@
-   .customer-group-field {
-       background-color: var(--fg-color);
-       border: 1px solid #ced4da;
-       border-radius: var(--border-radius-md);
-       padding: 10px;
-       margin-bottom: 10px;
-   }
+.customer-group-field {
+  background-color: var(--fg-color);
+  border: 1px solid #ced4da;
+  border-radius: var(--border-radius-md);
+  padding: 10px;
+  margin-bottom: 10px;
+}
 
-   .customer-group-field .form-control {
-       width: 100%;
-       padding: 5px;
-       font-size: 14px;
-   }
+.customer-group-field .form-control {
+  width: 100%;
+  padding: 5px;
+  font-size: 14px;
+}
 
-
-
-
-
-
-   /* .customer-field {
+/* .customer-field {
        background-color: var(--fg-color);
        border: 1px solid #ced4da;
        border-radius: var(--border-radius-md);
@@ -31,7 +26,6 @@
        font-size: 14px;
    } */
 
-
 /* 
 
 .customer-container {
@@ -42,3 +36,18 @@
 .customer-section {
     margin-right: 10px; 
 } */
+
+.btn-custom-green {
+ background: var(--bg-green);
+  color: var(--text-on-green);
+}
+
+.btn-custom-yellow {
+  background-color: #f0d994; /* Yellow */
+  color: #000; /* Black text */
+}
+
+.btn-custom-red {
+  background-color: #dc3545; /* Red */
+  color: #fff; /* White text */
+}
