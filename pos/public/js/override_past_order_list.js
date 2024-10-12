@@ -20,7 +20,9 @@ function overridePastOrderList() {
           df: {
             label: __("Invoice Status"),
             fieldtype: "Select",
-            options: `Draft\nPaid\nConsolidated\nReturn\nUnpaid`,
+            // options: `Draft\nPaid\nConsolidated\nReturn\nUnpaid`,
+            options: `\nDraft\nPaid\nUnpaid\nPaid Consolidated\nUnpaid Consolidated`,
+
             placeholder: __("Filter by invoice status"),
             onchange: function () {
               if (me.$component.is(":visible")) me.refresh_list();
@@ -33,6 +35,29 @@ function overridePastOrderList() {
         this.status_field.toggle_label(false);
         this.status_field.set_value("Draft");
       };
+
+    erpnext.PointOfSale.PastOrderList.prototype.refresh_list = function () {
+      frappe.dom.freeze();
+      this.events.reset_summary();
+      const search_term = this.search_field.get_value();
+      const custom_status2 = this.status_field.get_value();
+
+      this.$invoices_container.html("");
+
+      return frappe.call({
+        method:
+          "erpnext.selling.page.point_of_sale.point_of_sale.get_past_order_list",
+        freeze: true,
+        args: { search_term, custom_status2 },
+        callback: (response) => {
+          frappe.dom.unfreeze();
+          response.message.forEach((invoice) => {
+            const invoice_html = this.get_invoice_html(invoice);
+            this.$invoices_container.append(invoice_html);
+          });
+        },
+      });
+    };
   } else {
     setTimeout(overridePastOrderList, 100);
   }

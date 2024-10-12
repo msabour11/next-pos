@@ -37,9 +37,10 @@ function overridePastOrderSummary() {
         const doc = this.events.get_frm().doc;
         const pos_profile = doc.pos_profile;
         // const cus_account = await this.get_customer_account(pos_profile);
-        const cus_account = await this.get_customer_account_from_api(
+        const cus_account = await this.get_customer_account_from_api(this.doc.company,
           this.doc.customer
         );
+        const paid_to = await this.get_account_to(pos_profile);
 
         let newFieldValue = this.$summary_container.find("#new-field").val();
 
@@ -61,6 +62,8 @@ function overridePastOrderSummary() {
           return;
         }
 
+        console.log("the data is", doc);
+
         console.log(this.doc);
         frappe.call({
           method: "pos.pos_api.pos_postpaid",
@@ -70,6 +73,7 @@ function overridePastOrderSummary() {
             customer: this.doc.customer,
             reference_name: this.doc.consolidated_invoice,
             customer_account: cus_account,
+            paid_to: paid_to,
           },
           callback: function (r) {
             if (!r.exc) {
@@ -156,11 +160,11 @@ function overridePastOrderSummary() {
 
     ////////////////////////////
     erpnext.PointOfSale.PastOrderSummary.prototype.get_customer_account_from_api =
-      function (customer) {
+      function (company,customer) {
         return new Promise((resolve, reject) => {
           frappe.call({
             method: "pos.pos_api.get_accounts_details",
-            args: { customer: customer },
+            args: { company: company, customer: customer },
             callback: (res) => {
               if (res.message) {
                 const customer_account = res.message;
@@ -177,6 +181,33 @@ function overridePastOrderSummary() {
           });
         });
       };
+
+    // account to
+
+    erpnext.PointOfSale.PastOrderSummary.prototype.get_account_to = function (
+      pos_profile
+    ) {
+      return new Promise((resolve, reject) => {
+        frappe.call({
+          method:
+            "erpnext.selling.page.point_of_sale.point_of_sale.get_pos_profile_data",
+          args: { pos_profile: pos_profile },
+          callback: (res) => {
+            if (res.message) {
+              const customer_account_to = res.message.custom_paid_to;
+              console.log("customer account", customer_account_to);
+              resolve(customer_account_to); // Resolve the promise with the profile data
+            } else {
+              reject("No account to  data returned");
+            }
+          },
+          error: (err) => {
+            console.error("Error fetching profile data:", err);
+            reject(err); // Reject the promise on error
+          },
+        });
+      });
+    };
   } else {
     setTimeout(overridePastOrderSummary, 100);
   }

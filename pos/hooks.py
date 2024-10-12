@@ -59,6 +59,8 @@ app_include_js = [
 
 # include js in doctype views
 # doctype_js = {"doctype" : "public/js/doctype.js"}
+doctype_js = {"POS Invoice" : "public/js/override_pos_invoice.js"}
+
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
@@ -152,13 +154,14 @@ app_include_js = [
 # ---------------
 # Hook on document methods and events
 
-#   = {
+doc_events  = {
 # 	"*": {
 # 		"on_update": "method",
 # 		"on_cancel": "method",
 # 		"on_trash": "method"
 # 	}
-# }
+# "POS Invoice":{"after_submit":"pos.pos.override_pos_invoice_on_submit.on_submit"}
+}
 
 # Scheduled Tasks
 # ---------------
@@ -190,7 +193,10 @@ app_include_js = [
 # ------------------------------
 #
 override_whitelisted_methods = {
-	"erpnext.accounts.doctype.pos_invoice.pos_invoice.get_stock_availability": "pos.pos_api.get_stock_availability"
+	"erpnext.accounts.doctype.pos_invoice.pos_invoice.get_stock_availability": "pos.pos_api.get_stock_availability",
+	"erpnext.selling.page.point_of_sale.point_of_sale.get_past_order_list":"pos.pos_api.get_past_order_list",
+	# "erpnext.accounts.doctype.payment_entry.payment_entry.get_party_details":"pos.pos_api.get_party_details"
+
 }
 #
 # each overriding function accepts a `data` argument;
