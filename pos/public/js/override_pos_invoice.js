@@ -1,7 +1,5 @@
 frappe.ui.form.on("POS Invoice", {
   on_submit(frm) {
-    frappe.msgprint("from on status field");
-
     frappe.call({
       method: "pos.pos_api.change_status",
       args: {
@@ -11,7 +9,6 @@ frappe.ui.form.on("POS Invoice", {
         console.log(r.message, "frm.doc.custom_status2", frm.doc.company);
       },
     });
-    frappe.msgprint("from on submit")
   },
 
   // status(frm) {
