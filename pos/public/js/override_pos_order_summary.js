@@ -37,7 +37,8 @@ function overridePastOrderSummary() {
         const doc = this.events.get_frm().doc;
         const pos_profile = doc.pos_profile;
         // const cus_account = await this.get_customer_account(pos_profile);
-        const cus_account = await this.get_customer_account_from_api(this.doc.company,
+        const cus_account = await this.get_customer_account_from_api(
+          this.doc.company,
           this.doc.customer
         );
         const paid_to = await this.get_account_to(pos_profile);
@@ -160,7 +161,7 @@ function overridePastOrderSummary() {
 
     ////////////////////////////
     erpnext.PointOfSale.PastOrderSummary.prototype.get_customer_account_from_api =
-      function (company,customer) {
+      function (company, customer) {
         return new Promise((resolve, reject) => {
           frappe.call({
             method: "pos.pos_api.get_accounts_details",
@@ -208,6 +209,32 @@ function overridePastOrderSummary() {
         });
       });
     };
+
+    erpnext.PointOfSale.PastOrderSummary.prototype.get_condition_btn_map =
+      function (after_submission) {
+        if (after_submission)
+          return [
+            {
+              condition: true,
+              visible_btns: ["Print Receipt", "Email Receipt", "New Order"],
+            },
+          ];
+
+        return [
+          {
+            condition: this.doc.docstatus === 0,
+            visible_btns: ["Edit Order", "Delete Order"],
+          },
+          {
+            condition: !this.doc.is_return && this.doc.docstatus === 1,
+            visible_btns: ["Print Receipt", "Email Receipt", "Return", "Pay"],
+          },
+          {
+            condition: this.doc.is_return && this.doc.docstatus === 1,
+            visible_btns: ["Print Receipt", "Email Receipt"],
+          },
+        ];
+      };
   } else {
     setTimeout(overridePastOrderSummary, 100);
   }
