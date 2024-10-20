@@ -160,7 +160,7 @@ doc_events  = {
 # 		"on_cancel": "method",
 # 		"on_trash": "method"
 # 	}
-# "POS Invoice":{"after_submit":"pos.pos.override_pos_invoice_on_submit.on_submit"}
+"POS Invoice":{"on_submit":"pos.pos_api.change_status_on_submit"}
 }
 
 # Scheduled Tasks

@@ -1,4 +1,9 @@
 
+import frappe
+from erpnext.accounts.utils import get_balance_on
+from frappe.query_builder.functions import IfNull, Sum
+from frappe.utils import cint, flt, get_link_to_form, getdate, nowdate
+from erpnext.accounts.doctype.payment_entry.payment_entry import get_party_details
 
 
 # @frappe.whitelist()
@@ -104,50 +109,7 @@
 #     # return customer_account
 #     return customer_account
 
-import frappe
-from erpnext.accounts.utils import get_balance_on
-from frappe.query_builder.functions import IfNull, Sum
-from frappe.utils import cint, flt, get_link_to_form, getdate, nowdate
-from erpnext.accounts.doctype.payment_entry.payment_entry import get_party_details
 
-# @frappe.whitelist()
-# def pos_postpaid(customer=None, name=None, paid_amount=None, reference_name=None,customer_account=None,paid_to=None):
-#     # customer_account = get_accounts_details(customer)
-#     print(customer_account,"\n\n\n\n/n/n/n/n")
-#     # Retrieve the POS Invoice document
-#     doc = frappe.get_doc("POS Invoice", name)
-#     paid_amount = float(paid_amount)
-
-#     if doc.outstanding_amount == 0:
-#         return 0
-#     if doc.status == "Consolidated":
-#         add_payment_entry(customer, paid_amount, reference_name,customer_account,paid_to)
-        
-
-#     # Update the total_net_weight field
-#     old_paid = doc.paid_amount
-#     doc.paid_amount = paid_amount + old_paid
-#     doc.outstanding_amount = doc.grand_total - doc.paid_amount
-#     if doc.outstanding_amount == 0:
-#         doc.status = "Paid"
-
-
-#     # Update the base_amount field in the payments child table
-#     for payment in doc.payments:
-#         payment.amount += paid_amount
-#         payment.base_amount = payment.amount
-
-#     # Allow changes to the document even if it is submitted
-#     doc.flags.ignore_permissions = True
-#     doc.flags.ignore_validate_update_after_submit = True
-
-#     # Save the document
-#     doc.save(ignore_permissions=True)
-
-#     # Commit the changes to the database
-#     frappe.db.commit()
-
-#     return "hi how are you"
 
 ############################test consalidate
 
@@ -171,11 +133,24 @@ def pos_postpaid(customer=None, name=None, paid_amount=None, reference_name=None
         add_payment_entry(customer, paid_amount, reference_name, customer_account, paid_to)
 
         # Update custom status based on outstanding amount
-        doc.custom_status2 = "Paid Consolidated" if doc.outstanding_amount == 0 else "Unpaid Consolidated"
+        # doc.custom_status2 = "Paid Consolidated" if doc.outstanding_amount == 0 else "Unpaid Consolidated"
+        if doc.outstanding_amount == 0:
+            doc.custom_status2 = "Paid Consolidated"
+        elif doc.outstanding_amount >0 and doc.outstanding_amount < doc.grand_total:
+            doc.custom_status2 = "Partial Consolidated"
+        else:
+            doc.custom_status2 = "Unpaid Consolidated"
+
+        
+
     else:
-        # Regular POS Invoice status handling
-        # doc.status = "Paid" if doc.outstanding_amount == 0 else doc.status
-        doc.custom_status2=doc.status
+        if doc.outstanding_amount >0 and doc.outstanding_amount < doc.grand_total:
+            doc.custom_status2 = "Partial Paid"
+        else:
+             doc.custom_status2=doc.status
+
+       
+       
 
     # Update the payments child table
     for payment in doc.payments:
@@ -260,6 +235,8 @@ def change_invoice_status():
     doc = frappe.get_doc("POS Invoice", name)
     if doc.outstanding_amount==0:
         doc.stutus=="Paid"
+    elif doc.outstanding_amount >0 and doc.outstanding_amount <doc.grand_total:
+        pass
     else:
         doc.stutus=="Unpaid"
 
@@ -419,44 +396,6 @@ def get_past_order_list(search_term, custom_status2, limit=20):
 
 
 
-
-
-
-
-
-
-#########################
-
-
-
-
-#test on submit
-@frappe.whitelist()
-def change_status(doc_name):
-    doc=frappe.get_doc("POS Invoice",doc_name)
-   
-    print("from on submit")
-    # Check the outstanding amount to determine custom status2
-    if doc.status == "Consolidated":
-        # Update custom status based on outstanding amount
-        doc.custom_status2 = "Paid Consolidated" if doc.outstanding_amount == 0 else "Unpaid Consolidated"
-    else:
-        # Regular POS Invoice status handling
-        doc.custom_status2 = doc.status
-    
-
-
-    # Save changes to the document
-    doc.flags.ignore_permissions = True
-    doc.flags.ignore_validate_update_after_submit = True
-
-    # Save and commit the document
-    doc.save(ignore_permissions=True)
-    frappe.db.commit()
-
-
-
-
 # change the status2 when closing the shift
 @frappe.whitelist()
 def change_consalidate_status(close_name):
@@ -472,6 +411,9 @@ def change_consalidate_status(close_name):
         pos_invoice_doc = frappe.get_doc("POS Invoice", pos_invoice_name)
         if pos_invoice_doc.outstanding_amount==0:
              pos_invoice_doc.custom_status2 = "Paid Consolidated"
+        elif pos_invoice_doc.outstanding_amount >0 and pos_invoice_doc.outstanding_amount < pos_invoice_doc.grand_total:
+            pos_invoice_doc.custom_status2 = "Partial Consolidated"
+
         else :
             pos_invoice_doc.custom_status2 = "Unpaid Consolidated"
 
@@ -496,3 +438,53 @@ def change_consalidate_status(close_name):
     frappe.db.commit()
 
 
+
+
+
+
+
+# change pos invoice status on submit
+
+def change_status_on_submit(doc,method):
+   
+   
+    print("from on submit")
+    # Check the outstanding amount to determine custom status2
+    if doc.status == "Consolidated":
+
+
+        if doc.outstanding_amount==0:
+             doc.custom_status2 = "Paid Consolidated"
+        elif doc.outstanding_amount >0 and doc.outstanding_amount < doc.grand_total:
+            doc.custom_status2 = "Partial Consolidated"
+
+        else :
+            pos_invoice_doc.doc = "Unpaid Consolidated"
+        # Regular POS Invoice status handling
+       
+        # Update custom status based on outstanding amount
+        
+    else:
+
+        if doc.outstanding_amount==0:
+            doc.custom_status2 = "Paid"
+        elif doc.outstanding_amount >0 and doc.outstanding_amount < doc.grand_total:
+            doc.custom_status2 = "Partial Paid"
+
+        else :
+            doc.custom_status2 = "Unpaid"
+        # Regular POS Invoice status handling
+        # doc.custom_status2 = doc.status
+    doc.flags.ignore_permissions = True
+    doc.flags.ignore_validate_update_after_submit = True
+    
+    # Optionally, you can also save the changes to the POS Closing Entry document
+    doc.save(ignore_permissions=True)
+
+    # Commit the changes to the database
+    frappe.db.commit()
+
+
+
+
+   

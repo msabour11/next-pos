@@ -143,9 +143,7 @@ function overridePOSCustomerSelector() {
           console.log("the is pay value is", is_payed);
           if ((is_cach_group || is_payed) && paid_amount < grand_total) {
             frappe.show_alert({
-              message: __(
-                "You must Enter The Complete Payment."
-              ),
+              message: __("You must Enter The Complete Payment."),
               indicator: "orange",
             });
             frappe.utils.play_sound("error");
@@ -156,10 +154,19 @@ function overridePOSCustomerSelector() {
           return; // Exit if there's an error with the profile check
         }
 
-        if (paid_amount == 0 || !items.length) {
-          const message = items.length
-            ? __("You cannot submit the order without payment.")
-            : __("You cannot submit empty order.");
+        // if (paid_amount == 0 || !items.length) {
+        //   const message = items.length
+        //     ? __("You cannot submit the order without payment.")
+        //     : __("You cannot submit empty order.");
+        //   frappe.show_alert({ message, indicator: "orange" });
+        //   frappe.utils.play_sound("error");
+        //   return;
+        // }
+
+        if (!items.length) {
+          const message = items.length;
+
+          __("You cannot submit empty order.");
           frappe.show_alert({ message, indicator: "orange" });
           frappe.utils.play_sound("error");
           return;

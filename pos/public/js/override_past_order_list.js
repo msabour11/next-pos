@@ -21,7 +21,7 @@ function overridePastOrderList() {
             label: __("Invoice Status"),
             fieldtype: "Select",
             // options: `Draft\nPaid\nConsolidated\nReturn\nUnpaid`,
-            options: `\nDraft\nPaid\nUnpaid\nPaid Consolidated\nUnpaid Consolidated`,
+            options: `\nDraft\nPaid\nUnpaid\nPaid Consolidated\nUnpaid Consolidated\nPartial Consolidated\nPartial Paid`,
 
             placeholder: __("Filter by invoice status"),
             onchange: function () {
