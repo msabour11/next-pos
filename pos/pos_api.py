@@ -144,10 +144,14 @@ def pos_postpaid(customer=None, name=None, paid_amount=None, reference_name=None
         
 
     else:
-        if doc.outstanding_amount >0 and doc.outstanding_amount < doc.grand_total:
+        if doc.outstanding_amount==0:
+            doc.custom_status2 = "Paid"
+        elif 0 < doc.outstanding_amount < doc.grand_total:
             doc.custom_status2 = "Partial Paid"
-        else:
-             doc.custom_status2=doc.status
+
+        else :
+            doc.custom_status2 = "Unpaid"
+        
 
        
        
