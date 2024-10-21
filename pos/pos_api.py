@@ -67,7 +67,7 @@ from erpnext.accounts.doctype.payment_entry.payment_entry import get_party_detai
 #     }
 #     #add payments details in payment reference child table
 #     pe.update(payment_entry)
- 	
+
 #     references = [
 #         {
 #             "reference_doctype": "Sales Invoice",
@@ -247,9 +247,9 @@ def change_invoice_status():
 
 def get_pos_reserved_qty_of_bundles(item_code):
     """
-	Calculate the total reserved quantity of item get sold in bundles.
+    Calculate the total reserved quantity of item get sold in bundles.
     Args:
-	    item_code (str): The item code for which to calculate the reserved quantity.
+        item_code (str): The item code for which to calculate the reserved quantity.
     Returns:
         int: The total reserved quantity of item get sold in bundles.
     """
@@ -268,10 +268,10 @@ def get_pos_reserved_qty_of_bundles(item_code):
 
     all_items = (
         frappe.qb.from_(p_inv)
-		.from_(p_item)
+        .from_(p_item)
         .select(p_item.item_code, p_item.qty, p_item.conversion_factor)
         .where(
-			(p_inv.name == p_item.parent)&
+            (p_inv.name == p_item.parent)&
             (IfNull(p_inv.consolidated_invoice, "") == "") & 
             (p_item.docstatus == 1) &
             (p_inv.docstatus == 1) &
@@ -307,60 +307,60 @@ def get_stock_availability(item_code, warehouse):
             is_stock_item = False
             return 0, is_stock_item
             
-	
+
 
 # helper functions for bundle
 
 def get_bin_qty(item_code, warehouse):
-	bin_qty = frappe.db.sql(
-		"""select actual_qty from `tabBin`
-		where item_code = %s and warehouse = %s
-		limit 1""",
-		(item_code, warehouse),
-		as_dict=1,
-	)
+    bin_qty = frappe.db.sql(
+        """select actual_qty from `tabBin`
+        where item_code = %s and warehouse = %s
+        limit 1""",
+        (item_code, warehouse),
+        as_dict=1,
+    )
 
-	return bin_qty[0].actual_qty or 0 if bin_qty else 0
+    return bin_qty[0].actual_qty or 0 if bin_qty else 0
 
 def get_pos_reserved_qty(item_code, warehouse):
-	p_inv = frappe.qb.DocType("POS Invoice")
-	p_item = frappe.qb.DocType("POS Invoice Item")
+    p_inv = frappe.qb.DocType("POS Invoice")
+    p_item = frappe.qb.DocType("POS Invoice Item")
 
-	reserved_qty = (
-		frappe.qb.from_(p_inv)
-		.from_(p_item)
-		.select(Sum(p_item.stock_qty).as_("stock_qty"))
-		.where(
-			(p_inv.name == p_item.parent)
-			& (IfNull(p_inv.consolidated_invoice, "") == "")
-			& (p_item.docstatus == 1)
-			& (p_item.item_code == item_code)
-			& (p_item.warehouse == warehouse)
-		)
-	).run(as_dict=True)
+    reserved_qty = (
+        frappe.qb.from_(p_inv)
+        .from_(p_item)
+        .select(Sum(p_item.stock_qty).as_("stock_qty"))
+        .where(
+            (p_inv.name == p_item.parent)
+            & (IfNull(p_inv.consolidated_invoice, "") == "")
+            & (p_item.docstatus == 1)
+            & (p_item.item_code == item_code)
+            & (p_item.warehouse == warehouse)
+        )
+    ).run(as_dict=True)
 
-	return flt(reserved_qty[0].stock_qty) if reserved_qty else 0
+    return flt(reserved_qty[0].stock_qty) if reserved_qty else 0
 
 
 
 def get_bundle_availability(bundle_item_code, warehouse):
 
-	product_bundle = frappe.get_doc("Product Bundle", bundle_item_code)
+    product_bundle = frappe.get_doc("Product Bundle", bundle_item_code)
 
-	bundle_bin_qty = 1000000
-	for item in product_bundle.items:
-		item_bin_qty = get_bin_qty(item.item_code, warehouse)
-		item_pos_reserved_qty = get_pos_reserved_qty(item.item_code, warehouse)
-		available_qty = item_bin_qty - item_pos_reserved_qty
+    bundle_bin_qty = 1000000
+    for item in product_bundle.items:
+        item_bin_qty = get_bin_qty(item.item_code, warehouse)
+        item_pos_reserved_qty = get_pos_reserved_qty(item.item_code, warehouse)
+        available_qty = item_bin_qty - item_pos_reserved_qty
 
-		max_available_bundles = available_qty / item.qty
-		if bundle_bin_qty > max_available_bundles and frappe.get_value(
-			"Item", item.item_code, "is_stock_item"
-		):
-			bundle_bin_qty = max_available_bundles
+        max_available_bundles = available_qty / item.qty
+        if bundle_bin_qty > max_available_bundles and frappe.get_value(
+            "Item", item.item_code, "is_stock_item"
+        ):
+            bundle_bin_qty = max_available_bundles
 
-	pos_sales_qty = get_pos_reserved_qty(bundle_item_code, warehouse)
-	return bundle_bin_qty - pos_sales_qty
+    pos_sales_qty = get_pos_reserved_qty(bundle_item_code, warehouse)
+    return bundle_bin_qty - pos_sales_qty
 
 
 
@@ -368,30 +368,30 @@ def get_bundle_availability(bundle_item_code, warehouse):
 
 @frappe.whitelist()
 def get_past_order_list(search_term, custom_status2, limit=20):
-	fields = ["name", "grand_total", "currency", "customer", "posting_time", "posting_date"]
-	invoice_list = []
+    fields = ["name", "grand_total", "currency", "customer", "posting_time", "posting_date"]
+    invoice_list = []
 
-	if search_term and custom_status2:
-		invoices_by_customer = frappe.db.get_all(
-			"POS Invoice",
-			filters={"customer": ["like", f"%{search_term}%"], "custom_status2": custom_status2},
-			fields=fields,
-			page_length=limit,
-		)
-		invoices_by_name = frappe.db.get_all(
-			"POS Invoice",
-			filters={"name": ["like", f"%{search_term}%"], "custom_status2": custom_status2},
-			fields=fields,
-			page_length=limit,
-		)
+    if search_term and custom_status2:
+        invoices_by_customer = frappe.db.get_all(
+            "POS Invoice",
+            filters={"customer": ["like", f"%{search_term}%"], "custom_status2": custom_status2},
+            fields=fields,
+            page_length=limit,
+        )
+        invoices_by_name = frappe.db.get_all(
+            "POS Invoice",
+            filters={"name": ["like", f"%{search_term}%"], "custom_status2": custom_status2},
+            fields=fields,
+            page_length=limit,
+        )
 
-		invoice_list = invoices_by_customer + invoices_by_name
-	elif custom_status2:
-		invoice_list = frappe.db.get_all(
-			"POS Invoice", filters={"custom_status2": custom_status2}, fields=fields, page_length=limit
-		)
+        invoice_list = invoices_by_customer + invoices_by_name
+    elif custom_status2:
+        invoice_list = frappe.db.get_all(
+            "POS Invoice", filters={"custom_status2": custom_status2}, fields=fields, page_length=limit
+        )
 
-	return invoice_list
+    return invoice_list
 
 
 
@@ -411,7 +411,7 @@ def change_consalidate_status(close_name):
         pos_invoice_doc = frappe.get_doc("POS Invoice", pos_invoice_name)
         if pos_invoice_doc.outstanding_amount==0:
              pos_invoice_doc.custom_status2 = "Paid Consolidated"
-        elif pos_invoice_doc.outstanding_amount >0 and pos_invoice_doc.outstanding_amount < pos_invoice_doc.grand_total:
+        elif 0 < pos_invoice_doc.outstanding_amount < pos_invoice_doc.grand_total:
             pos_invoice_doc.custom_status2 = "Partial Consolidated"
 
         else :
@@ -448,18 +448,18 @@ def change_consalidate_status(close_name):
 def change_status_on_submit(doc,method):
    
    
-    print("from on submit")
+    print("from on submit pos invoice")
     # Check the outstanding amount to determine custom status2
     if doc.status == "Consolidated":
 
 
         if doc.outstanding_amount==0:
              doc.custom_status2 = "Paid Consolidated"
-        elif doc.outstanding_amount >0 and doc.outstanding_amount < doc.grand_total:
+        elif 0 < doc.outstanding_amount < doc.grand_total:
             doc.custom_status2 = "Partial Consolidated"
 
         else :
-            pos_invoice_doc.doc = "Unpaid Consolidated"
+            doc.custom_status2 = "Unpaid Consolidated"
         # Regular POS Invoice status handling
        
         # Update custom status based on outstanding amount
@@ -468,7 +468,7 @@ def change_status_on_submit(doc,method):
 
         if doc.outstanding_amount==0:
             doc.custom_status2 = "Paid"
-        elif doc.outstanding_amount >0 and doc.outstanding_amount < doc.grand_total:
+        elif 0 < doc.outstanding_amount < doc.grand_total:
             doc.custom_status2 = "Partial Paid"
 
         else :
