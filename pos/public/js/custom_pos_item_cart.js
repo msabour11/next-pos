@@ -36,9 +36,41 @@ function overridePOSItemCart() {
 
         let filters = {};
         const allowed_customer_group = this.allowed_customer_groups || [];
+        console.log("Allowed Customer Groups:", this.allowed_customer_groups);
+
         filters = {
           name: ["in", allowed_customer_group],
         };
+        /////
+
+        if (allowed_customer_group.length > 0) {
+          filters = {
+            name: ["in", allowed_customer_group],
+          };
+        } else {
+          // Fetch all customer groups if allowed_customer_group is empty
+          frappe.call({
+            method: "frappe.client.get_list",
+            args: {
+              doctype: "Customer Group",
+              fields: ["name"],
+            },
+            callback: function (response) {
+              const allCustomerGroups = response.message || [];
+              const allGroupNames = allCustomerGroups.map(
+                (group) => group.name
+              );
+              filters = {
+                name: ["in", allGroupNames],
+              };
+              // me.initializeCustomerGroupField(filters); // Call a method to initialize the field with the filters
+            },
+          });
+          // return; // Exit the function to wait for the async call
+        }
+
+        ///////
+
         this.customer_group_field = frappe.ui.form.make_control({
           df: {
             label: __("Customer Group"),
@@ -68,22 +100,32 @@ function overridePOSItemCart() {
       `);
 
       const me = this;
-      let filters = {};
-      const allowed_customer_group = this.allowed_customer_groups || [];
+      // let filters = {};
 
-      console.log("allowed_customer_group", allowed_customer_group);
-      console.log("customer_group length", allowed_customer_group.length);
-      if (customer_group && allowed_customer_group.length > 1) {
         filters = {
           customer_group: customer_group,
         };
-      } else if (customer_group && allowed_customer_group.length == 1) {
-        filters = {
-          customer_group: allowed_customer_group[0],
-        };
-      } else {
-        filters = { customer_group: ["in", allowed_customer_group] };
-      }
+
+      // const allowed_customer_group = this.allowed_customer_groups || [];
+
+      // console.log("allowed_customer_group", allowed_customer_group);
+      // console.log("customer_group length", allowed_customer_group.length);
+      // // Check if allowed_customer_groups is empty
+      // if (allowed_customer_group.length === 0) {
+      //   // Allow all customer groups if none are restricted
+      //   filters = {};
+      // }
+      // else if (customer_group && allowed_customer_group.length > 1) {
+      //   filters = {
+      //     customer_group: customer_group,
+      //   };
+      // } else if (customer_group && allowed_customer_group.length == 1) {
+      //   filters = {
+      //     customer_group: allowed_customer_group[0],
+      //   };
+      // } else {
+      //   filters = { customer_group: ["in", allowed_customer_group] };
+      // }
 
       this.customer_field = frappe.ui.form.make_control({
         df: {
