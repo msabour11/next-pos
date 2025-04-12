@@ -1,8 +1,8 @@
 app_name = "pos"
 app_title = "Pos"
-app_publisher = "mohamed Sabour"
+app_publisher = "Mohamed Abdelsabour"
 app_description = "Pos customization"
-app_email = "mohamedabdelsabour269@gmail.com"
+app_email = "eng.mohammed.sabour@gmail.com"
 app_license = "mit"
 
 # Apps
